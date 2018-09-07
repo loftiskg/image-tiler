@@ -59,7 +59,7 @@ class TiledImage(object):
 
         for row in range(len(self.tiles)):
             for col in range(len(self.tiles[row])):
-                tile_name = f"{prefix}_{:03d}_{:03d}.png".format(row,col)
+                tile_name = "{}_{:03d}_{:03d}.png".format(prefix,row,col)
                 path = os.path.join(outdir,tile_name)
                 self.tiles[row][col].save(path)
 
