@@ -13,6 +13,7 @@ PIL_image.show()
 ```
 ![earth_img](./test_imgs/earth.jpg)
 
+
 ```
 tiled_img = TiledImage.createFromImage(PIL_image,244)
 print(tiled_img.shape)
@@ -30,6 +31,7 @@ for idx, tile in enumerate(firstRow):
   plt.imshow(tile)
 plt.show()
 ```
+
 ![first row of tiles](./test_imgs/firstRow.jpeg)
 
 Finally you can save the tiles to file.  They will save in the following format:
