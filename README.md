@@ -13,18 +13,19 @@ PIL_image.show()
 ```
 ![earth_img](./test_imgs/earth.jpg)
 
-
+Now lets tile the image!
 ```
 tiled_img = TiledImage.createFromImage(PIL_image,244)
 print(tiled_img.shape)
+# (5,5)
 ```
 
-When using a TiledImage object to tile an image you only have to specify the size of the tiles that you want.  The number of tiles is calculated behind the scenes. All tiles will have the same size, thus if the image is not tiled evenly, the last tile in the row or column will be padded with 0. Currently only square tiles are supported.
+When using a TiledImage object to tile an image you only have to specify the size of the tiles that you want.  The number of tiles is calculated behind the scenes. All tiles will have the same size, thus if the image does not tile evenly, the last tile in the row or column will be padded with 0 to make the tile the same size as the rest. Currently only square tiles are supported.
 
-You can also index each tile from where they would be on a grid.
+You can also index each tile from where they would be on a grid.  The below code gets the tiles for the first row.
 ```
 import matplotlib.pyplot as plt
-firstRow = [tiled_img[0,i] for i in range(5)]
+firstRow = [ tiled_img[0,i] for i in range(tiled_img.shape[0]) ]
 for idx, tile in enumerate(firstRow):
   plt.subplot(1,5,idx+1)
   plt.axis('off')
