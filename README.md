@@ -2,18 +2,23 @@
 
 The purpose of the Image Tiler is to make it easy to go back and forth between tiled versions of an image and stiched version of an image.  image-tiler also allows you to save the tiles to file.
 
-## How does it work?
+## Quick example
 
-Lets look at an example.
+Lets load in an image in an image and try it out.
 ``` 
 from tiledimage import TiledImage
 from PIL import Image
 PIL_image = Image.open('test_imgs/earth.jpg')
+PIL_image.show()
+```
+![earth_img](./test_imgs/earth.jpg)
+
+```
 tiled_img = TiledImage.createFromImage(PIL_image,244)
 print(tiled_img.shape)
-## (5,5)
 ```
-Whne using a TiledImage object to tile an image you only have to specify the size of the tiles that you want.  The number of tiles is calculated behind the scenes.  Currently only square tiles are supported.
+
+When using a TiledImage object to tile an image you only have to specify the size of the tiles that you want.  The number of tiles is calculated behind the scenes. All tiles will have the same size, thus if the image is not tiled evenly, the last tile in the row or column will be padded with 0. Currently only square tiles are supported.
 
 You can also index each tile from where they would be on a grid.
 ```
@@ -25,6 +30,7 @@ for idx, tile in enumerate(firstRow):
   plt.imshow(tile)
 plt.show()
 ```
+![first row of tiles](./test_imgs/firstRow.jpeg)
 
 Finally you can save the tiles to file.  They will save in the following format:
 {PREFIX}_RR_CC.png where RR is the row index of the image and CC is the column index. 
