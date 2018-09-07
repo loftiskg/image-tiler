@@ -9,6 +9,7 @@ class TiledImage(object):
         self.tile_coords = []
         self.image = None
         self.tile_size=0
+        self.shape=(0,0)
 
     @staticmethod
     def createFromImage(image,tileSize):
@@ -25,7 +26,7 @@ class TiledImage(object):
         tiledImage.image = image
         tiledImage.tile_size = tileSize;
         tiledImage.tiles, tiledImage.tile_coords = ImageTiler(image,tileSize)
-        
+        tiledImage.shape = (len(tiledImage.tiles),len(tiledImage.tiles[0]))
         return tiledImage
 
 
@@ -58,7 +59,7 @@ class TiledImage(object):
 
         for row in range(len(self.tiles)):
             for col in range(len(self.tiles[row])):
-                tile_name = "Tile_{:03d}_{:03d}.png".format(row,col)
+                tile_name = f"{prefix}_{:03d}_{:03d}.png".format(row,col)
                 path = os.path.join(outdir,tile_name)
                 self.tiles[row][col].save(path)
 
@@ -87,6 +88,7 @@ class TiledImage(object):
         img.tileSize = tiles[0][0].width, tiles[0][0].height
         img.image = stitchTiles(tiles,image_size)
         img.tile_coords = computeTileCoords(tiles)
+        img.shape = (len(tiles),len(tiles[0]))
         return img
 
 def computeTileCoords(tiles):
