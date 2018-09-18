@@ -2,7 +2,7 @@ from PIL import Image, ImageOps
 import math
 import os
 import shutil
-
+import numpy as np
 class TiledImage(object):
     def __init__(self):
         self.tiles=[]
@@ -10,7 +10,14 @@ class TiledImage(object):
         self.image = None
         self.tile_size=0
         self.shape=(0,0)
-
+    def toNumpy(self):
+        'outputs the tiles as a numpy ndarray of size (self.shape[0],self.shape[1],tilesize,tilesize)'
+        array = np.zeros((self.shape[0],self.shape[1],self.tile_size,self.tile_size))
+        
+        for i,row in enumerate(self.tiles):
+            for j,tile in enumerate(row):
+                array[i,j] = np.array(tile)
+        return array,self.image.size
     @staticmethod
     def createFromImage(image,tileSize):
         '''creates nonoverlapping square tiles of size tileSize from image.
@@ -62,6 +69,34 @@ class TiledImage(object):
                 tile_name = "{}_{:03d}_{:03d}.png".format(prefix,row,col)
                 path = os.path.join(outdir,tile_name)
                 self.tiles[row][col].save(path)
+    @staticmethod
+    def fromTiledNumpyArray(array,size=None):
+        '''
+        Given a 4D numpy array, (R,C,S,S), where R is the rows of tiles, C is the columns of tiles
+        , and S is the size of each tile, converts the numpy array into a TiledImage object.
+
+        The size of the image can be given if you would like to crop off the edges.
+        '''
+        if len(array.shape) != 4:
+            raise ValueError('Invalid shape. Array must have shape (R,C,S,S)')
+        tile_size = array.shape[2]
+        
+        totalsize = array.shape[0]*tile_size,array.shape[1]*tile_size
+        stitched_array = np.zeros(totalsize)
+
+        for i in range(array.shape[0]):
+            for j in range(array.shape[1]):
+                i_idx,j_idx = i*tile_size, j*tile_size
+                i_idx_to, j_idx_to = i_idx+tile_size, j_idx+tile_size
+                stitched_array[i_idx:i_idx_to,j_idx:j_idx_to] = array[i,j]
+        
+        
+        if size is not None:
+            stitched_array = stitched_array[0:size[1],0:size[0]]
+        
+        a = TiledImage.createFromImage(Image.fromarray(stitched_array),tile_size)
+        return a
+
 
     @staticmethod
     def loadFromDirectory(directory,gridSize,tile_name_pattern = "Tile_{:03d}_{:03d}.png",indexStart=0,image_size=(900,900)):
@@ -170,6 +205,22 @@ def ImageTiler(image, tileSize):
 
     return tiles,tile_coords
 
+def reshapeFlattenedTilesNumpy(numpy_array,shape):
+    if len(shape) != 2:
+        raise ValueError('shape must be of length 2')
+    if len(numpy_array.shape) != 3:
+        raise ValueError('shape of numpy_array must equal 3')
+    if shape[0]*shape[1] != numpy_array.shape[0]:
+        raise ValueError(f'Cannot reshape numpy_array into {shape[0]} x {shape[1]} tiles')
+
+    new_shape = (shape[0],shape[1],numpy_array.shape[1],numpy_array.shape[2])
+    reshaped_array = np.zeros(new_shape)
+    count=0
+    for row in range(shape[0]):
+        for col in range(shape[1]):
+            reshaped_array[row,col] = numpy_array[count]
+            count+=1
+    return reshaped_array
 
 def computeNumberOfTiles(image_size,tile_size):
     if tile_size > image_size:
@@ -186,15 +237,21 @@ def computePadding(image_size,tile_size):
 
 
 def main():
-    img = Image.open("img/img.jpg")
-    tiledImage = TiledImage.createFromImage(img,512)
+    img = Image.open("test_imgs/earth.jpg").convert('L')
+    print(img.size)
+    tiledImage = TiledImage.createFromImage(img,1)
     
     #shutil.rmtree('out')
-    tiledImage.save('out')
+    #tiledImage.save('out')
     
-    
-    loaded = TiledImage.loadFromDirectory('out',(2,2))
-    loaded.viewStiched()
+    array,_ = tiledImage.toNumpy()
+   
+    img = TiledImage.fromTiledNumpyArray(array,(1024,1024))
+
+    img.viewStiched()
+    print(img.image.size)
+    #loaded = TiledImage.loadFromDirectory('out',(2,2))
+    #loaded.viewStiched()
     
 
 
